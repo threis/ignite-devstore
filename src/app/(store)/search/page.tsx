@@ -1,9 +1,12 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 
 import { api } from '@/data/api'
 import { Product } from '@/data/types/product'
+
+import { CurrentSearch } from './currentSearch'
 
 interface SearchProps {
   searchParams: {
@@ -25,17 +28,17 @@ async function getSearchProducts(query: string): Promise<Product[]> {
 export default async function Search({ searchParams }: SearchProps) {
   const { q: query } = searchParams
 
+  const products = await getSearchProducts(query)
+
   if (!query) {
     redirect('/')
   }
 
-  const products = await getSearchProducts(query)
-
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm">
-        Resultados para: <span className="font-semibold">{query}</span>
-      </p>
+      <Suspense fallback={null}>
+        <CurrentSearch />
+      </Suspense>
       <div className="grid grid-cols-3 gap-6">
         {products.map((product) => {
           return (
